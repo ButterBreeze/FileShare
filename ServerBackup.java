@@ -1,3 +1,6 @@
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,8 +13,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.*;
 
-public class ServerTest extends Thread {
+public class ServerBackup extends Thread {
 
 	static int activeConnectionNumber = 0;
 	static boolean[] connectionOpen = new boolean[100];
@@ -19,7 +23,7 @@ public class ServerTest extends Thread {
 	static File errorFile;
 	static PrintWriter pw;
 
-	public static void main(String[] args) throws IOException {
+	public static void main() throws IOException {
 		try {
 
 			// The error file that the computer writes to
@@ -33,6 +37,8 @@ public class ServerTest extends Thread {
 			ServerSocket serverSocket;
 			serverSocket = new ServerSocket(2048);
 			Socket socket = null;
+
+
 
 			// sets all sockets to false and in future can add more stuff there
 			init();
@@ -150,6 +156,9 @@ public class ServerTest extends Thread {
 		String computerName;
 		int whatToExpect = 0; // 5 is file 7 is folder
 
+
+
+
 		input = new DataInputStream(connections[connectionNumber].getInputStream());
 		output = new DataOutputStream(connections[connectionNumber].getOutputStream());
 		System.out.println("Serving Client Number:" + connectionNumber);
@@ -162,6 +171,10 @@ public class ServerTest extends Thread {
 		input.readChar();
 
 		computerName = input.readLine();
+        checkComputerName(computerName);
+        output.writeChar('k');
+
+
 		String filePathString = "C:\\Users\\User\\Desktop\\BackedUpStuffs\\" + computerName;
 		String runningPath = filePathString;
 		new File(filePathString).mkdirs();
@@ -300,5 +313,34 @@ public class ServerTest extends Thread {
 		output.flush();
 		return folderPath;
 	}
+
+	public static void checkComputerName(String computerName){
+        String url = "jdbc:mysql://localhost:3306/ihc";
+        String username = "root";
+        String password = "";
+
+        System.out.println("Connecting database...");
+        Connection connection= null;
+        try {
+
+            connection = DriverManager.getConnection(url, username, password);
+            System.out.println("Database connected!");
+
+            PreparedStatement stmt = connection.prepareStatement("SELECT COMP_NAME FROM COMPUTERS WHERE COMP_NAME = ? ");
+            stmt.setString(1, computerName);
+            ResultSet rs = stmt.executeQuery();
+            if(!rs.next()){
+                PreparedStatement stmt2 = connection.prepareStatement("INSERT INTO COMPUTERS (COMP_NAME) VALUES (?)");
+                stmt.setString(1, computerName);
+            }
+
+
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot connect the database!", e);
+        }catch(Exception ex){
+
+        }
+
+    }
 
 }
