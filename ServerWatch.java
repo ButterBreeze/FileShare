@@ -1,12 +1,22 @@
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+/**
+ * Programmer:  ButterBreeze
+ * Date:        Jan/2018
+ * Purpose:     To start a backup task every night, wait for incoming connections and deal with them.
+ *              Also can push a file to all computers on the list it creates.
+ *              TODO: create a file push and get the backup to keep a list of all computers that backed up to it.
+ *
+ *
+ */
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Calendar;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class ServerWatch {
@@ -67,7 +77,7 @@ public class ServerWatch {
             output.write("ready");
             String instructions = input.readLine();
 
-            if (instructions == "TabletBackup") { //Backup the tablet files/oasis
+            if (instructions == "DeviceBackup") { //Backup the files sent
 
             }
 
@@ -77,7 +87,10 @@ public class ServerWatch {
 
     }
 
-    public static void startBackupCountdown() {
+    /**
+     * Loops the backup cycle calls initialize backup
+     */
+    public static void backupLoop() {
 
 
         Thread backupThread = new Thread() {
@@ -88,25 +101,37 @@ public class ServerWatch {
         backupThread.start();
     }
 
+    /**
+     * Creates a scheduled task so that backup starts at midnight
+     */
     public static void initializeBackup() {
 
 
-        int untilBackupMills = getMillsToMidnight();
-        ActionListener actionListener = new ActionListener() {
-
+        long untilBackupMills = getMillsToMidnight();
+        final ScheduledExecutorService ses = Executors.newSingleThreadScheduledExecutor();
+        ses.schedule(new Runnable() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void run() {
                 doBackup();
-            }
-        };
 
-        Timer timer = new Timer(untilBackupMills, actionListener);
-        timer.start();
+            }
+        }, untilBackupMills, TimeUnit.MILLISECONDS);
+
+
+        ses.shutdown();
+
 
     }//end method
 
+    /**
+     * Calls the backup of ServerBackup class
+     */
     public static void doBackup() {
+        try{
+            ServerBackup.main();
+        }catch(Exception ex){
 
+        }
 
     }
 
@@ -115,7 +140,7 @@ public class ServerWatch {
      * @return time till midnight, returns int because int will be able to handle the amount we need
      *              (upto 24 days which is past midnight from anytime)
      */
-    public static int getMillsToMidnight(){
+    public static long getMillsToMidnight(){
 
 
         Calendar c = Calendar.getInstance();
@@ -124,7 +149,7 @@ public class ServerWatch {
         c.set(Calendar.MINUTE, 0);
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
-        return  (int) (c.getTimeInMillis()-System.currentTimeMillis());
+        return  (c.getTimeInMillis()-System.currentTimeMillis());
 
     }
 

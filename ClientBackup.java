@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class ClientTest {
+public class ClientBackup {
 
 	static Socket connection;
 	static File errorFile;
@@ -57,6 +57,7 @@ public class ClientTest {
 			output.writeBytes(computerName + "\n");
 			output.flush();
 
+			input.readChar();
 			//send all the dirs we got from the file above
 			sendPaths(pathsList, computerName);
 
