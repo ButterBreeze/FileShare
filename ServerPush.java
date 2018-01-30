@@ -1,13 +1,7 @@
 
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
+
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,23 +43,24 @@ public class ServerPush {
 
         Socket socket;
 
-        for (int i = 0; i < comps.size(); i++) {
+        for (int i = 0; i < comps.size(); i++)
             try {
                 socket = new Socket(comps.get(i), 16796);
                 DataOutputStream output;
-                DataInputStream input;
-                input = new DataInputStream(socket.getInputStream());
+                BufferedReader input;
+                input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
                 output = new DataOutputStream(socket.getOutputStream());
 
                 output.writeChars(whereFileIsGoing + "\n");
-                if (input.readChar() == 'E') {
+                if (input.readLine()== "E") {
                     System.out.println("Location does not exist in specified location");
                     System.exit(0);
                 }
 
                 output.writeBytes(file.getName() + "\n");
                 output.flush();
-                input.readByte();
+                input.readLine();
                 FileInputStream fos = new FileInputStream(file);
                 BufferedInputStream in = new BufferedInputStream(fos);
                 DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -101,7 +96,6 @@ public class ServerPush {
                 System.exit(2);
                 e.printStackTrace();
             }
-        }
 
     }
 
