@@ -13,10 +13,11 @@ public class ClientPush {
      * @param args
      */
     public static void main(String[] args) {
+        PrintWriter output = null;
+        BufferedReader input = null;
         while (true) {
             try {
-                PrintWriter output;
-                BufferedReader input;
+
                 ServerSocket serverSocket = new ServerSocket(16796);
                 Socket socket = null;
 
@@ -25,10 +26,13 @@ public class ClientPush {
                 output = new PrintWriter(socket.getOutputStream(), true);
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String PASSWORD = "asdfgh";
-                if (input.readLine().equals(PASSWORD)) {
+                if (!input.readLine().equals(PASSWORD)) {
                     output.write("PasswordIncorrect");
+                    output.flush();
                     return;
                 }
+
+
 
                 if (input.readLine().equals("recieveFile"))
                     getFile(socket, output, input);
@@ -37,8 +41,10 @@ public class ClientPush {
             } catch (IOException e) {
 
                 e.printStackTrace();
+                System.exit(0);
             } catch (Exception ex) {
                 ex.printStackTrace();
+                System.exit(0);
             }
 
         }
@@ -76,6 +82,8 @@ public class ClientPush {
                     boolean success = new File(folderLocation).mkdirs();
                     System.out.println(success);
                 }
+                output.println("goAhead");
+                output.flush();
                 writeFile(fileLocation, socket);
             }
         }
@@ -122,6 +130,7 @@ public class ClientPush {
 
             } catch (Exception e) {
                 e.printStackTrace();
+                System.exit(0);
             } // Ignore
         }
 
