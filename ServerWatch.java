@@ -5,6 +5,9 @@
  *              Also can push a file to all computers on the list it creates.
  *              TODO: create a file push and get the backup to keep a list of all computers that backed up to it.
  *              TODO: Convert all sockets to SSL
+ *              TODO: Create push service to all computers of a catagory (tablet, computers, all), or specific computers
+ *                          will use the dev password for that, will need to specify where to put all those files.
+ *              TODO: Create a webinterface for the users to be able to get their files and shtuffs.
  *
  */
 
@@ -23,6 +26,9 @@ public class ServerWatch {
 
     public static void main(String[] args) {
         try {
+
+            startOtherServices();
+
             ServerSocket instructionServerSocket = new ServerSocket(2048);
             instructionServerSocket.accept();
             Socket instructionSocket = null;
@@ -42,6 +48,19 @@ public class ServerWatch {
         }//end main loop
     }//end main
 
+
+    /**
+     * Purpose: this method will start the services in other thread.
+     * Current Services: Backup
+     */
+    public static void startOtherServices(){
+        backupLoop();
+
+
+    }
+
+
+
     /**
      * Purpose: this will see what the connection needs, and then opens a thread for it
      *
@@ -55,8 +74,8 @@ public class ServerWatch {
                 instructions(socket);
             }
         };
-
         instructionThread.start();
+
     }
 
 
@@ -79,7 +98,7 @@ public class ServerWatch {
             String instructions = input.readLine();
 
             if (instructions == "DeviceBackup") { //Backup the files sent
-
+                ClientPush.getFile(socket, output, input);
             }
 
         } catch (Exception ex) {
@@ -87,6 +106,7 @@ public class ServerWatch {
         }
 
     }
+
 
     /**
      * Loops the backup cycle calls initialize backup
