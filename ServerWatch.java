@@ -4,7 +4,7 @@
  * Purpose:     To start a backup task every night, wait for incoming connections and deal with them.
  *              Also can push a file to all computers on the list it creates.
  *              TODO: create a file push and get the backup to keep a list of all computers that backed up to it.
- *
+ *              TODO: Convert all sockets to SSL
  *
  */
 
